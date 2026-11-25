@@ -253,6 +253,7 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
 .pbtns { display: flex; gap: 8px; flex-wrap: wrap; }
 .pbtns .ghost { margin-top: 6px; }
 .sl { display: grid; grid-template-columns: 6.4em 1fr 3.6em; gap: 10px; align-items: center; }
+.sl.wide { grid-template-columns: 8.6em 1fr 3.2em; }
 .sl label { font-size: .85rem; font-weight: 700; }
 .sl output { font-family: var(--font-mono); font-size: .85rem; text-align: right; }
 
@@ -265,10 +266,6 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
 .crop-btns { display: flex; gap: 8px; justify-content: space-between; align-items: center; }
 .crop-btns .ghost { margin-top: 0; }
 
-/* 「動き」をなしにしたとき(設定で選ぶ) */
-html.calm .pop-in { animation: pfade 1.6s forwards; }
-html.calm .badge.bump { animation: none; }
-html.calm .btn, html.calm .fold-head .chev { transition: none; }
 </style>
 <script>
 /* 見た目の設定(早めに読み込んで、表示のちらつきを防ぐ) */
@@ -455,16 +452,18 @@ html.calm .btn, html.calm .fold-head .chev { transition: none; }
         </div>
       </div>
       <input type="file" id="file" accept="image/*" hidden>
-      <div class="sl">
-        <label for="veil">背景を薄く</label>
+      <div class="sl wide">
+        <label for="veil">背景の写真を薄く</label>
         <input type="range" id="veil" min="0" max="90" step="1" value="35">
         <output id="veilV" for="veil">35%</output>
       </div>
-      <div class="sl">
+      <p class="hint" style="margin:0 0 12px">右に動かすほど、背景の写真が白っぽく(暗い画面では黒っぽく)薄くなります。0%でそのままの写真です。</p>
+      <div class="sl wide">
         <label for="trans">カード透明度</label>
         <input type="range" id="trans" min="0" max="90" step="1" value="0">
         <output id="transV" for="trans">0%</output>
       </div>
+      <p class="hint" style="margin:0 0 6px">右に動かすほど、入力欄や表示欄が透けて、後ろの背景の写真が見えます。</p>
       <p class="msg" id="photoMsg" role="status" aria-live="polite" style="min-height:0"></p>
     </section>
 
@@ -479,15 +478,6 @@ html.calm .btn, html.calm .fold-head .chev { transition: none; }
       <p class="msg" id="wMsg" role="status" aria-live="polite" style="min-height:0"></p>
       <button class="ghost" id="wreset" type="button" style="margin-top:0">初期の言葉に戻す</button>
       <p class="hint">最大10個まで。元からある言葉も消して、自分の言葉だけにできます。我慢するたびに、この中からランダムで1つ出ます。</p>
-    </section>
-
-    <section class="set">
-      <h3>動き(ポンと出る演出など)</h3>
-      <div class="seg" id="motionSeg" role="radiogroup" aria-label="動き">
-        <button type="button" role="radio" data-m="on" aria-checked="true">あり</button>
-        <button type="button" role="radio" data-m="off" aria-checked="false">なし</button>
-      </div>
-      <p class="hint">スマホの「動きを減らす」設定がオンでも、ここが「あり」なら動きます。</p>
     </section>
 
     <section class="set">
@@ -525,9 +515,9 @@ html.calm .btn, html.calm .fold-head .chev { transition: none; }
     <p class="hint" id="cropHint" style="margin:0"></p>
     <div class="stage"><canvas id="cropCv" aria-label="写真の位置の調整(ドラッグで動かせます)"></canvas></div>
     <div class="sl"><label for="zoom">拡大</label><input type="range" id="zoom" min="100" max="400" step="1" value="100"><output id="zoomV" for="zoom">100%</output></div>
-    <div class="sl"><label for="sx">横に伸ばす</label><input type="range" id="sx" min="100" max="200" step="1" value="100"><output id="sxV" for="sx">100%</output></div>
-    <div class="sl"><label for="sy">縦に伸ばす</label><input type="range" id="sy" min="100" max="200" step="1" value="100"><output id="syV" for="sy">100%</output></div>
-    <p class="hint" style="margin:0">ドラッグで位置を動かせます。伸ばす量を変えると写真の縦横の比率が変わります。</p>
+    <div class="sl"><label for="sx">横幅</label><input type="range" id="sx" min="-100" max="100" step="1" value="0"><output id="sxV" for="sx">0</output></div>
+    <div class="sl"><label for="sy">縦幅</label><input type="range" id="sy" min="-100" max="100" step="1" value="0"><output id="syV" for="sy">0</output></div>
+    <p class="hint" style="margin:0">ドラッグで位置を動かせます。横幅・縦幅は、真ん中の0が元の比率です。右(+)で広げ、左(−)で縮められます。</p>
     <div class="crop-btns">
       <button class="ghost" id="cropReset" type="button">リセット</button>
       <button class="btn sm" id="cropOk" type="button">決定</button>
@@ -544,9 +534,7 @@ html.calm .btn, html.calm .fold-head .chev { transition: none; }
   var entries = [];
   var soundOn = true;
   var statTab = 'week';
-  var motionOn = true;
-  try { motionOn = localStorage.getItem('gaman-motion') !== 'off'; } catch (e) {}
-  var reduce = !motionOn;   // 数字のカウントアップや演出を止めるか(端末の設定ではなく、アプリの設定で決める)
+  var reduce = false;   // 演出は全員いつも動く(端末の「動きを減らす」設定にも、アプリの設定にも左右されない)
 
   /* ---------- チャリーン (Web Audio で合成) ---------- */
   var ac = null;
@@ -654,17 +642,32 @@ html.calm .btn, html.calm .fold-head .chev { transition: none; }
     var M = MODES[CR.mode];
     var base = Math.max(M.fw / CR.iw, M.fh / CR.ih);
     var w = CR.iw * base * CR.zoom * CR.sx, h = CR.ih * base * CR.zoom * CR.sy;
-    var mx = (w - M.fw) / 2, my = (h - M.fh) / 2;
+    var mx = Math.max(0, (w - M.fw) / 2), my = Math.max(0, (h - M.fh) / 2);
     CR.ox = Math.max(-mx, Math.min(mx, CR.ox));
     CR.oy = Math.max(-my, Math.min(my, CR.oy));
     return { w: w, h: h, x: M.fw / 2 - w / 2 + CR.ox, y: M.fh / 2 - h / 2 + CR.oy };
   }
+  /* 縮めて枠にすき間ができたときは、写真をぼかして広げたものでうめる */
+  function paintPhoto(c, W, H, g, k) {
+    c.fillStyle = '#fff'; c.fillRect(0, 0, W, H);
+    c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+    if (g.w * k < W - 0.5 || g.h * k < H - 0.5) {
+      var cb = Math.max(W / CR.iw, H / CR.ih) * 1.2, bw = CR.iw * cb, bh = CR.ih * cb;
+      c.save();
+      try { c.filter = 'blur(' + Math.max(4, Math.round(W * 0.05)) + 'px)'; } catch (e) {}
+      c.drawImage(CR.img, (W - bw) / 2, (H - bh) / 2, bw, bh);
+      c.restore();
+    }
+    c.drawImage(CR.img, g.x * k, g.y * k, g.w * k, g.h * k);
+  }
+  function mulToSlider(m) { return Math.round(m >= 1 ? (m - 1) * 100 : (m - 1) * 200); }
+  function sliderToMul(n) { return n >= 0 ? 1 + n / 100 : 1 + n / 200; }
+  function signed(n) { return n > 0 ? '+' + n : String(n); }
   function drawCrop() {
     if (!CR.img) return;
     var M = MODES[CR.mode], cv = $('cropCv'), c = cv.getContext('2d'), g = geom();
     c.setTransform(2, 0, 0, 2, 0, 0);
-    c.fillStyle = '#fff'; c.fillRect(0, 0, M.fw, M.fh);
-    c.drawImage(CR.img, g.x, g.y, g.w, g.h);
+    paintPhoto(c, M.fw, M.fh, g, 1);
     if (CR.mode === 'coin') {
       c.save();
       c.fillStyle = 'rgba(0,0,0,.5)';
@@ -677,8 +680,9 @@ html.calm .btn, html.calm .fold-head .chev { transition: none; }
   }
   function syncCropUi() {
     $('zoom').value = Math.round(CR.zoom * 100); $('zoomV').textContent = Math.round(CR.zoom * 100) + '%';
-    $('sx').value = Math.round(CR.sx * 100); $('sxV').textContent = Math.round(CR.sx * 100) + '%';
-    $('sy').value = Math.round(CR.sy * 100); $('syV').textContent = Math.round(CR.sy * 100) + '%';
+    var nx = mulToSlider(CR.sx), ny = mulToSlider(CR.sy);
+    $('sx').value = nx; $('sxV').textContent = signed(nx);
+    $('sy').value = ny; $('syV').textContent = signed(ny);
   }
   function resetCrop() { CR.zoom = 1; CR.sx = 1; CR.sy = 1; CR.ox = 0; CR.oy = 0; syncCropUi(); drawCrop(); }
   function loadIntoCropper(mode, dataUrl) {
@@ -712,10 +716,7 @@ html.calm .btn, html.calm .fold-head .chev { transition: none; }
   function exportCrop() {
     var M = MODES[CR.mode], g = geom(), k = M.ow / M.fw;
     var out = document.createElement('canvas'); out.width = M.ow; out.height = M.oh;
-    var c = out.getContext('2d');
-    c.fillStyle = '#fff'; c.fillRect(0, 0, M.ow, M.oh);
-    c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
-    c.drawImage(CR.img, g.x * k, g.y * k, g.w * k, g.h * k);
+    paintPhoto(out.getContext('2d'), M.ow, M.oh, g, k);
     return out.toDataURL('image/jpeg', 0.85);
   }
 
@@ -744,8 +745,13 @@ html.calm .btn, html.calm .fold-head .chev { transition: none; }
     }
   });
 
-  [['zoom', 'zoom', 100], ['sx', 'sx', 100], ['sy', 'sy', 100]].forEach(function (a) {
-    $(a[0]).addEventListener('input', function () { CR[a[1]] = Number($(a[0]).value) / 100; syncCropUi(); drawCrop(); });
+  $('zoom').addEventListener('input', function () { CR.zoom = Number($('zoom').value) / 100; syncCropUi(); drawCrop(); });
+  [['sx', 'sx'], ['sy', 'sy']].forEach(function (a) {
+    $(a[0]).addEventListener('input', function () {
+      var n = Number($(a[0]).value);
+      if (Math.abs(n) <= 3) n = 0;          // 0のあたりでピタッと止まる
+      CR[a[1]] = sliderToMul(n); syncCropUi(); drawCrop();
+    });
   });
   $('cropReset').addEventListener('click', resetCrop);
   $('cropCancel').addEventListener('click', closeCrop);
@@ -1061,20 +1067,6 @@ html.calm .btn, html.calm .fold-head .chev { transition: none; }
   }
   setupFold('foldStatsBtn', 'statsBody', 'gaman-open-stats');
   setupFold('foldRankBtn', 'rankBody', 'gaman-open-rank');
-
-  function paintMotion() {
-    reduce = !motionOn;
-    document.documentElement.classList.toggle('calm', !motionOn);
-    var bs = $('motionSeg').querySelectorAll('button');
-    for (var i = 0; i < bs.length; i++) bs[i].setAttribute('aria-checked', String((bs[i].getAttribute('data-m') === 'on') === motionOn));
-  }
-  $('motionSeg').addEventListener('click', function (e) {
-    var b = e.target.closest && e.target.closest('button[data-m]');
-    if (!b) return;
-    motionOn = b.getAttribute('data-m') === 'on'; paintMotion();
-    try { localStorage.setItem('gaman-motion', motionOn ? 'on' : 'off'); } catch (x) {}
-  });
-  paintMotion();
 
   var query = '', filterTag = null, editingId = null;
 
