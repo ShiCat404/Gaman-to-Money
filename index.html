@@ -52,8 +52,7 @@ body {
   padding-bottom: max(56px, env(safe-area-inset-bottom, 0px));
 }
 .wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-.top { display: flex; justify-content: space-between; }
-.top { flex-direction: column; align-items: stretch; gap: 8px; }
+.top { display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; gap: 8px; }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .logo { flex: none; width: 52px; height: 52px; display: block; filter: drop-shadow(0 3px 5px rgba(140, 90, 0, .35)); }
 .brand-t { min-width: 0; }
@@ -91,7 +90,29 @@ html.has-bg .foot { padding-top: 6px; padding-bottom: 6px; }
   background: linear-gradient(135deg, #ffe597, var(--gold) 55%, #dd9210);
   box-shadow: inset 0 0 0 4px color-mix(in srgb, #fff 45%, transparent), inset 0 0 0 6px color-mix(in srgb, #8a5a00 30%, transparent); }
 .badge.photo { background-size: cover; background-position: center; box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px var(--line); }
+@media (hover: hover) { .badge { cursor: pointer; } }
+.badge { -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .badge.bump { animation: bump .5s ease-out; }
+/* お金の絵をタップして遊ぶ小ネタ: 跳ねる・回る・潰れる → 100回目で爆発 → 5秒後に復活 */
+.badge.t-hop { animation: t-hop .55s cubic-bezier(.3, .7, .4, 1); }
+.badge.t-spin { animation: t-spin .75s cubic-bezier(.25, .1, .25, 1); }
+.badge.t-squash { animation: t-squash .6s ease-out; }
+.badge.boom { animation: t-boom .5s ease-in forwards; }
+.badge.gone { visibility: hidden; pointer-events: none; }
+.badge.revive { animation: t-revive .8s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes t-hop { 0% { transform: none; } 14% { transform: scale(1.2, .8); } 45% { transform: translateY(-34px) scale(.92, 1.1); } 75% { transform: scale(1.12, .88); } 90% { transform: scale(.97, 1.03); } 100% { transform: none; } }
+@keyframes t-spin { 0% { transform: perspective(320px) rotateY(0) scale(1); } 50% { transform: perspective(320px) rotateY(360deg) scale(1.15); } 100% { transform: perspective(320px) rotateY(720deg) scale(1); } }
+@keyframes t-squash { 0% { transform: none; } 20% { transform: translateY(12px) scale(1.4, .42); } 45% { transform: scale(.84, 1.22); } 68% { transform: scale(1.1, .92); } 100% { transform: none; } }
+@keyframes t-boom { 0% { transform: scale(1); opacity: 1; } 25% { transform: scale(1.35) rotate(-7deg); } 50% { transform: scale(1.7) rotate(7deg); filter: brightness(1.6); } 100% { transform: scale(2.4); opacity: 0; filter: brightness(3); } }
+@keyframes t-revive { 0% { transform: scale(0) rotate(-200deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.boom-fx { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 85; pointer-events: none; }
+.boom-fx i { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--c, #f5b83d); animation: t-fly .95s cubic-bezier(.2, .7, .4, 1) forwards; }
+.boom-fx i.sp { width: 8px; height: 8px; left: -4px; top: -4px; }
+.boom-fx b { position: absolute; left: -40px; top: -40px; width: 80px; height: 80px; border-radius: 50%; border: 8px solid #ff8a1f; animation: t-ring .7s ease-out forwards; }
+@keyframes t-fly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 60% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 1; } 100% { transform: translate(calc(var(--dx) * 1.12), calc(var(--dy) + 70px)) scale(.3); opacity: 0; } }
+@keyframes t-ring { 0% { transform: scale(.2); opacity: 1; } 100% { transform: scale(4); opacity: 0; border-width: 1px; } }
+.hero.shake { animation: t-shake .5s linear; }
+@keyframes t-shake { 0%, 100% { transform: none; } 12% { transform: translate(-7px, 4px); } 25% { transform: translate(6px, -5px); } 38% { transform: translate(-5px, -3px); } 52% { transform: translate(5px, 4px); } 66% { transform: translate(-3px, 2px); } 80% { transform: translate(2px, -2px); } }
 @keyframes bump { 0% { transform: scale(1); } 35% { transform: scale(1.18) rotate(-8deg); } 100% { transform: scale(1); } }
 .sub { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; border-top: 2px dotted color-mix(in srgb, var(--ink) 22%, transparent); padding-top: 14px; }
 .sub .v { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
@@ -108,7 +129,7 @@ input.invalid { border-color: var(--danger); }
 input[type="date"] { -webkit-appearance: none; appearance: none; display: block; width: 100%; min-width: 0; max-width: 100%; height: calc(1.6em + 25px); text-align: left; }
 input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; min-width: 0; }
 input[type="date"]::-webkit-datetime-edit { padding: 0; }
-input:focus-visible, button:focus-visible, canvas:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+input:focus-visible, button:focus-visible, canvas:focus-visible, .badge:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 input#price { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .btn { font: inherit; font-weight: 900; border: 0; border-radius: 999px; padding: 14px 16px; cursor: pointer; background: var(--accent); color: var(--accent-ink); grid-column: 1 / -1; font-size: 1.1rem; letter-spacing: .06em; box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 60%, #000); transition: transform .08s, box-shadow .08s; }
 .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 60%, #000); }
@@ -132,13 +153,6 @@ input#price { font-family: var(--font-mono); font-variant-numeric: tabular-nums;
 .cur .v small { font-size: .7em; font-weight: 700; color: var(--muted); margin-left: .15em; }
 .cur .span { grid-column: 1 / -1; font-size: .8rem; color: var(--muted); font-weight: 700; }
 .plist { list-style: none; margin: 8px 0 0; padding: 0; }
-.prow { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 3px 10px; padding: 9px 0; border-top: 1.5px dashed var(--line); }
-.prow:first-child { border-top: 0; }
-.prow .pl { font-weight: 700; font-size: .9rem; min-width: 0; flex: 0 0 auto; }
-.prow .pv { margin-left: auto; font-family: var(--font-mono); font-size: .85rem; color: var(--gain); text-align: right; overflow-wrap: anywhere; min-width: 0; font-variant-numeric: tabular-nums; }
-.prow.zero .pv { color: var(--muted); }
-.prow .bar { flex: 0 0 100%; height: 8px; border-radius: 999px; background: var(--hero-bg); overflow: hidden; }
-.prow .bar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
 
 .groups { display: flex; flex-direction: column; gap: 18px; }
 .month { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; padding: 0 4px 8px; }
@@ -191,11 +205,11 @@ input#price { font-family: var(--font-mono); font-variant-numeric: tabular-nums;
 .chart { display: flex; padding-top: 18px; }
 .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; padding: 0 2px; font: inherit; color: inherit; cursor: pointer; }
 .barbox { width: 100%; height: 140px; display: flex; align-items: flex-end; justify-content: center; border-bottom: 2px solid var(--line); }
-.bar { display: block; width: 100%; max-width: 36px; height: calc(100% * var(--p, 0)); border-radius: 8px 8px 0 0; background: color-mix(in srgb, var(--accent) 50%, var(--surface));
+.cbar { display: block; width: 100%; max-width: 36px; height: calc(100% * var(--p, 0)); border-radius: 8px 8px 0 0; background: color-mix(in srgb, var(--accent) 50%, var(--surface));
   transform-origin: 50% 100%; animation: grow 1.1s cubic-bezier(.3, 1.7, .5, 1) both; animation-delay: calc(var(--i, 0) * 90ms); }
-@supports (animation-timing-function: linear(0, 1)) { .bar { animation-timing-function: linear(0, 0.222, 0.481, 0.729, 0.936, 1.088, 1.181, 1.22, 1.218, 1.187, 1.141, 1.09, 1.042, 1.004, 0.977, 0.962, 0.956, 0.958, 0.965, 0.975, 0.985, 0.994, 1.001, 1.005, 1.008, 1.009, 1.008, 1.006, 1); } }
-.col[aria-pressed="true"] .bar { background: var(--accent); }
-.col.zero .bar { height: 3px; border-radius: 2px; background: var(--line); animation: none; }
+@supports (animation-timing-function: linear(0, 1)) { .cbar { animation-timing-function: linear(0, 0.222, 0.481, 0.729, 0.936, 1.088, 1.181, 1.22, 1.218, 1.187, 1.141, 1.09, 1.042, 1.004, 0.977, 0.962, 0.956, 0.958, 0.965, 0.975, 0.985, 0.994, 1.001, 1.005, 1.008, 1.009, 1.008, 1.006, 1); } }
+.col[aria-pressed="true"] .cbar { background: var(--accent); }
+.col.zero .cbar { height: 3px; border-radius: 2px; background: var(--line); animation: none; }
 .lab { font-size: .62rem; line-height: 1.2; color: var(--muted); white-space: nowrap; max-width: 100%; overflow: hidden; }
 .col.now .lab, .col[aria-pressed="true"] .lab { color: var(--ink); font-weight: 900; }
 .chart-max { margin: 8px 0 0; font-size: .75rem; color: var(--muted); text-align: right; overflow-wrap: anywhere; }
@@ -211,6 +225,11 @@ input#price { font-family: var(--font-mono); font-variant-numeric: tabular-nums;
 .rf-row .label { flex: 0 0 5.6em; }
 .rf-row.stack { align-items: flex-start; flex-direction: column; gap: 6px; }
 .rf .tabs { background: var(--surface); }
+.share-opt { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.share-opt b { font-size: .88rem; }
+.seg button:disabled { opacity: .45; cursor: not-allowed; }
+#shareSeg { max-width: 100%; }
+#shareSeg button { padding: 5px 12px; }
 .rf .tagbtn { background: var(--surface); }
 .rf .ghost { align-self: flex-start; }
 .rrow { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 10px; padding: 9px 0; border-top: 1.5px dashed var(--line); }
@@ -258,7 +277,6 @@ input#price { font-family: var(--font-mono); font-variant-numeric: tabular-nums;
 .tagbtn { font: inherit; font-size: .78rem; font-weight: 700; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); padding: 3px 10px; cursor: pointer; }
 .tagbtn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .ledger-sec { display: flex; flex-direction: column; gap: 14px; }
-.rank-sort { margin-bottom: 4px; }
 
 /* 実績 */
 .ach-sum { margin: 10px 0 0; font-size: .85rem; font-weight: 700; }
@@ -317,6 +335,13 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
 .photo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
 .photo-row b { font-size: .88rem; }
 .pthumb { flex: none; background: var(--hero-bg) center / cover no-repeat; border: 1.5px solid var(--line); display: grid; place-items: center; font-weight: 900; color: var(--muted); font-size: .7rem; }
+.photo-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; max-width: 300px; margin: 0 auto 14px; }  /* 2枚を中央に寄せて、すき間をせまく */
+.photo-pair .photo-row { flex-direction: column; align-items: center; justify-content: flex-start; gap: 8px; margin: 0; padding: 14px 10px; background: var(--hero-bg); border-radius: 14px; min-width: 0; text-align: center; }
+.photo-pair .photo-row > div:last-child { min-width: 0; width: 100%; display: flex; flex-direction: column; align-items: center; }
+.photo-pair .pbtns { justify-content: center; }
+.photo-pair .photo-row:last-child > * { transform: translateX(-8px); }  /* お金の絵だけ、見た目のバランスで少し左へ */
+.photo-pair .pthumb.coint { margin: 4px 0; }
+.photo-pair .pbtns .ghost { margin-top: 4px; padding: 7px 12px; font-size: .82rem; }
 .pthumb.bgt { width: 40px; height: 72px; border-radius: 10px; }
 .pthumb.coint { width: 64px; height: 64px; border-radius: 50%; }
 .pbtns { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -441,7 +466,7 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
         <div class="label">今までに我慢して稼いだ額</div>
         <div class="big"><span id="total">0</span><span class="unit">円</span></div>
       </div>
-      <div class="badge" id="badge" aria-hidden="true">¥</div>
+      <div class="badge" id="badge" role="button" tabindex="0" aria-label="お金の絵(タップすると遊べます)">¥</div>
     </div>
     <div class="sub">
       <div><div class="label" id="monthLabel">今月</div><div class="v"><span id="monthTotal">0</span> 円</div></div>
@@ -537,6 +562,7 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
 
     <section class="set">
       <h3>写真を使う</h3>
+      <div class="photo-pair">
       <div class="photo-row">
         <div class="pthumb bgt" id="thumbBg">なし</div>
         <div>
@@ -556,6 +582,15 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
             <button class="ghost" id="delCoin" type="button" hidden>はずす</button>
           </div>
         </div>
+      </div>
+      </div>
+      <div class="share-opt">
+        <b>共有する画像に使う写真</b>
+        <div class="seg">
+          <button type="button" role="switch" id="shBg" aria-checked="true">背景の写真 オン</button>
+          <button type="button" role="switch" id="shCoin" aria-checked="true">お金の絵 オン</button>
+        </div>
+        <p class="hint" id="shOptHint" style="margin:0"></p>
       </div>
       <input type="file" id="file" accept="image/*" hidden>
       <div class="sl wide">
@@ -626,9 +661,10 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
     <section class="set">
       <h3>共有する期間</h3>
       <div class="tabs" id="shareSeg" role="tablist" aria-label="共有する期間">
-        <button type="button" role="tab" data-p="all" aria-selected="true">これまで</button>
+        <button type="button" role="tab" data-p="week" aria-selected="true">今週</button>
         <button type="button" role="tab" data-p="month" aria-selected="false">今月</button>
-        <button type="button" role="tab" data-p="week" aria-selected="false">今週</button>
+        <button type="button" role="tab" data-p="year" aria-selected="false">今年</button>
+        <button type="button" role="tab" data-p="all" aria-selected="false">これまで</button>
       </div>
     </section>
     <img class="sharepv" id="sharePv" alt="共有する画像のプレビュー">
@@ -638,7 +674,7 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
       <button class="ghost" id="shareCopy" type="button">文章をコピー</button>
     </div>
     <p class="msg" id="shareMsg" role="status" aria-live="polite" style="min-height:0"></p>
-    <p class="hint" style="margin:0">共有されるのは、期間の合計金額・回数・実績の数だけです。品名やタグは含まれません。画像は、上のプレビューを長押しすると保存できます。</p>
+    <p class="hint" style="margin:0">共有されるのは、期間の合計金額と回数だけです。品名やタグは含まれません。設定した写真を使う場合は、その写真も画像に入ります(設定の「共有する画像に使う写真」で切り替えられます)。画像は、上のプレビューを長押しすると保存できます。</p>
   </div>
 </div>
 
@@ -678,7 +714,6 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
   var entries = [];
   var soundOn = true;
   var statTab = 'week';
-  var reduce = false;   // 演出は全員いつも動く(端末の「動きを減らす」設定にも、アプリの設定にも左右されない)
 
   /* ---------- チャリーン (Web Audio で合成) ---------- */
   var ac = null;
@@ -697,13 +732,32 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
       });
     });
   }
+  function audio() {
+    var C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    if (!ac) ac = new C();
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  function bakuon() {   // 爆発音: ノイズ+低いドーン
+    if (!soundOn) return;
+    try {
+      if (!audio()) return;
+      var t = ac.currentTime + 0.01, len = Math.floor(ac.sampleRate * 1.5), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0), i;
+      for (i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+      var src = ac.createBufferSource(); src.buffer = buf;
+      var f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(5200, t); f.frequency.exponentialRampToValueAtTime(110, t + 1.2);
+      var g = ac.createGain(); g.gain.setValueAtTime(0.7, t); g.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+      src.connect(f); f.connect(g); g.connect(ac.destination); src.start(t);
+      var o = ac.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(32, t + 0.55);
+      var og = ac.createGain(); og.gain.setValueAtTime(0.9, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+      o.connect(og); og.connect(ac.destination); o.start(t); o.stop(t + 0.85);
+    } catch (e) {}
+  }
   function chalin() {
     if (!soundOn) return;
     try {
-      var C = window.AudioContext || window.webkitAudioContext;
-      if (!C) return;
-      if (!ac) ac = new C();
-      if (ac.state === 'suspended') ac.resume();
+      if (!audio()) return;
       var t = ac.currentTime + 0.02;
       var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 9000;
       var master = ac.createGain(); master.gain.value = 0.32;
@@ -727,6 +781,48 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
     if (soundOn) chalin();
   });
 
+  /* ---------- 小ネタ: お金の絵をタップして遊ぶ ---------- */
+  var tapN = 0, boomed = false, lastTrick = '';
+  function restartClass(node, cls) { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }
+  function boomFx(bd) {
+    var r = bd.getBoundingClientRect(), fx = document.createElement('div'), n = 0, cols = ['#f5b83d', '#ffe597', '#ff8a1f', '#ff4d2e', '#ffd34d'];
+    fx.className = 'boom-fx'; fx.style.left = (r.left + r.width / 2) + 'px'; fx.style.top = (r.top + r.height / 2) + 'px';
+    fx.appendChild(document.createElement('b'));
+    for (n = 0; n < 22; n++) {
+      var a = Math.random() * Math.PI * 2, dist = 70 + Math.random() * 110, p = document.createElement('i');
+      if (n % 3) p.className = 'sp';
+      p.style.setProperty('--dx', Math.round(Math.cos(a) * dist) + 'px'); p.style.setProperty('--dy', Math.round(Math.sin(a) * dist - 20) + 'px');
+      p.style.setProperty('--c', cols[n % cols.length]); fx.appendChild(p);
+    }
+    document.body.appendChild(fx); setTimeout(function () { if (fx.parentNode) fx.parentNode.removeChild(fx); }, 1100);
+  }
+  function tapBadge() {
+    if (boomed) return;
+    var bd = $('badge');
+    tapN++;
+    if (tapN >= 100) {
+      boomed = true; bd.className = 'badge' + (P.coin ? ' photo' : '');
+      void bd.offsetWidth; bd.classList.add('boom');
+      bakuon(); boomFx(bd); restartClass(document.querySelector('.hero'), 'shake');
+      toast('💥 ドカーン！ 5秒でもどります');
+      setTimeout(function () { bd.classList.add('gone'); }, 480);
+      setTimeout(function () {
+        bd.classList.remove('boom', 'gone'); restartClass(bd, 'revive'); tapN = 0; boomed = false; chalin();
+      }, 5000);
+      return;
+    }
+    chalin();
+    var tricks = ['t-hop', 't-spin', 't-squash'].filter(function (x) { return x !== lastTrick; });
+    lastTrick = tricks[Math.floor(Math.random() * tricks.length)];
+    bd.classList.remove('t-hop', 't-spin', 't-squash', 'bump', 'revive'); void bd.offsetWidth; bd.classList.add(lastTrick);
+  }
+  $('badge').addEventListener('animationend', function (e) {   // 終わった演出のクラスは外す(次の「我慢する」の演出と重ならないように)
+    var m = { 't-hop': 't-hop', 't-spin': 't-spin', 't-squash': 't-squash', 't-revive': 'revive' }[e.animationName];
+    if (m) $('badge').classList.remove(m);
+  });
+  $('badge').addEventListener('click', tapBadge);
+  $('badge').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tapBadge(); } });
+
   /* ---------- 写真 (背景 / お金の絵) ---------- */
   var P = { bg: null, coin: null, veil: 35, trans: 0 };
   function okImg(s) { return typeof s === 'string' && s.indexOf('data:image/') === 0 ? s : null; }
@@ -738,6 +834,21 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
     var tv = localStorage.getItem(LS_TRANS);
     if (tv !== null && !isNaN(Number(tv))) P.trans = Math.max(0, Math.min(90, Number(tv)));
   } catch (e) {}
+  var SH = { bg: true, coin: true }, LS_SH = 'gaman-share-photo';
+  try { var shv = JSON.parse(localStorage.getItem(LS_SH) || '{}'); if (shv && shv.bg === false) SH.bg = false; if (shv && shv.coin === false) SH.coin = false; } catch (e) {}
+  function paintShOpt() {
+    [['shBg', 'bg', '背景の写真'], ['shCoin', 'coin', 'お金の絵']].forEach(function (r) {
+      var b = $(r[0]), has = !!P[r[1]], on = has && SH[r[1]];
+      b.disabled = !has; b.setAttribute('aria-checked', String(on));
+      b.textContent = r[2] + (has ? (on ? ' オン' : ' オフ') : ' 未設定');
+    });
+    $('shOptHint').textContent = (P.bg || P.coin)
+      ? 'オンにすると、共有する画像の背景やまん中のマークが、設定した写真になります。オフだと、いつもの紺色の背景と金貨ロゴです。'
+      : '背景の写真やお金の絵を設定すると、ここで共有画像に使うかどうかを選べます。';
+  }
+  function toggleSh(k) { SH[k] = !SH[k]; try { localStorage.setItem(LS_SH, JSON.stringify(SH)); } catch (e) {} paintShOpt(); }
+  $('shBg').addEventListener('click', function () { toggleSh('bg'); });
+  $('shCoin').addEventListener('click', function () { toggleSh('coin'); });
   function savePhotos() {
     try {
       if (P.bg) localStorage.setItem(LS_BG, P.bg); else localStorage.removeItem(LS_BG);
@@ -764,6 +875,7 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
     $('delBg').hidden = !has; $('delCoin').hidden = !P.coin;
     $('pickBg').textContent = has ? '写真を変える' : '写真を選ぶ';
     $('pickCoin').textContent = P.coin ? '写真を変える' : '写真を選ぶ';
+    paintShOpt();
     $('veil').value = P.veil; $('veilV').textContent = P.veil + '%';
     $('trans').value = P.trans; $('transV').textContent = P.trans + '%';
     paintGlass();
@@ -1025,13 +1137,24 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
   }
   function monthTitle(k) { var p = k.split('-'); return p[0] + '年' + Number(p[1]) + '月'; }
   function saveLocal() { try { localStorage.setItem(LS, JSON.stringify(entries)); return true; } catch (e) { return false; } }
-  function loadLocal() { try { var v = JSON.parse(localStorage.getItem(LS) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+  // 保存データが壊れていても画面が真っ白にならないよう、読み込み時に最低限の形をそろえる(IDがないものは付け直す)
+  function loadLocal() {
+    try {
+      var v = JSON.parse(localStorage.getItem(LS) || '[]'), seen = {};
+      if (!Array.isArray(v)) return [];
+      return v.filter(function (e) { return e && typeof e === 'object' && typeof e.item === 'string' && typeof e.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.date); })
+        .map(function (e, i) {
+          if (typeof e.id !== 'string' || !e.id || seen[e.id]) e.id = 'e' + Date.now().toString(36) + i + Math.random().toString(36).slice(2, 5);
+          seen[e.id] = 1; return e;
+        });
+    } catch (e) { return []; }
+  }
 
   function setNum(el, to) {
     var tb = typeof to === 'bigint' ? to : BigInt(Math.round(Number(to)) || 0), fb;
     try { fb = BigInt(el.dataset.v || '0'); } catch (x) { fb = 0n; }
     el.dataset.v = tb.toString();
-    if (reduce || fb === tb || tb > SAFE || fb > SAFE) { el.textContent = yen(tb); return; }
+    if (fb === tb || tb > SAFE || fb > SAFE) { el.textContent = yen(tb); return; }
     var from = Number(fb), toN = Number(tb), t0 = performance.now(), dur = 700;
     (function step(t) {
       var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
@@ -1106,7 +1229,7 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
       var col = el('button', 'col' + (a.n ? '' : ' zero') + (r === cur ? ' now' : '')); col.type = 'button';
       col.setAttribute('data-key', r);
       col.setAttribute('aria-label', (r === cur ? NOW[kind] + ' ' : '') + labelOf(kind, r) + ' ' + a.n + '回 ' + yen(a.s) + '円');
-      var box = el('span', 'barbox'), bar = el('span', 'bar');
+      var box = el('span', 'barbox'), bar = el('span', 'cbar');
       var p = max > 0n && a.s > 0n ? Math.max(0.03, Number(a.s * 1000n / max) / 1000) : 0;
       bar.style.setProperty('--p', String(p)); bar.style.setProperty('--i', String(i));
       box.appendChild(bar); col.appendChild(box); col.appendChild(el('span', 'lab', shortLabel(kind, r)));
@@ -1170,8 +1293,6 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
     });
     $('rtagsRow').hidden = !allTags.length;
     var active = (rankTab !== 'amount' ? 1 : 0) + (rankBy !== 'name' ? 1 : 0) + (rankTag ? 1 : 0);
-    $('rfBtn').textContent = active ? '絞り込み中(' + active + ')' : '絞り込む';
-    $('rfBtn').classList.toggle('on', active > 0);
     var tagName = ''; allTags.forEach(function (t) { if (t.key === rankTag) tagName = t.name; });
     $('rMode').textContent = !active ? '高額な我慢(合計金額が高い順)'
       : (rankTab === 'amount' ? '合計金額が高い順' : '回数が多い順') + ' ・ ' + (rankBy === 'tag' ? 'タグごと' : '名前ごと') + (rankTag ? ' ・ #' + tagName + ' のみ' : '');
@@ -1223,7 +1344,7 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
   });
   $('rfBtn').addEventListener('click', function () {
     var open = $('rfPanel').hidden;
-    $('rfPanel').hidden = !open; $('rfBtn').setAttribute('aria-expanded', String(open));
+    $('rfPanel').hidden = !open; $('rfBtn').setAttribute('aria-expanded', String(open)); $('rfBtn').classList.toggle('on', open);
   });
   $('rfReset').addEventListener('click', function () { rankTab = 'amount'; rankBy = 'name'; rankTag = null; renderRank(); });
 
@@ -1412,7 +1533,7 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
         var x = el('button', 'editbtn', '編集'); x.type = 'button'; x.setAttribute('aria-label', e.item + 'を編集');
         x.addEventListener('click', function () {
           editingId = e.id; renderLedger();
-          var inp = $('edName'); if (inp) { inp.focus(); try { inp.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' }); } catch (z) {} }
+          var inp = $('edName'); if (inp) { inp.focus(); try { inp.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (z) {} }
         });
         li.appendChild(el('span', 'd', fmtDate(e.date))); li.appendChild(n); li.appendChild(el('span', 'p', '+' + yen(bp(e)) + '円')); li.appendChild(x);
         ul.appendChild(li);
@@ -1603,17 +1724,16 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
   }
 
   /* ---------- 共有 (合計・回数・実績数だけ。品名やタグは入れない) ---------- */
-  var sharePeriod = 'all', shareBlob = null;
+  var sharePeriod = 'week', shareBlob = null;
   function shareData() {
     var kind = sharePeriod === 'all' ? null : sharePeriod, cur = kind ? keyOf(kind, todayStr()) : null, n = 0, sum = 0n;
     entries.forEach(function (e) { if (!kind || keyOf(kind, e.date) === cur) { n++; sum += bp(e); } });
-    var label = sharePeriod === 'all' ? '今までに我慢して稼いだ額' : sharePeriod === 'month' ? '今月 我慢して稼いだ額' : '今週 我慢して稼いだ額';
-    var got = Object.keys(loadAch()).filter(function (k) { return ACH.some(function (a) { return a.id === k; }); }).length;
-    return { n: n, sum: sum, label: label, got: got };
+    var label = { all: '今までに我慢して稼いだ額', year: '今年 我慢して稼いだ額', month: '今月 我慢して稼いだ額', week: '今週 我慢して稼いだ額' }[sharePeriod];
+    return { n: n, sum: sum, label: label };
   }
   function shareText(d) {
-    var w = sharePeriod === 'all' ? 'これまでに' : sharePeriod === 'month' ? '今月' : '今週';
-    return 'Gaman to Money で' + w + yen(d.sum) + '円分(' + d.n + '回)我慢しました!  実績 ' + d.got + '/' + ACH.length + '  #GamanToMoney';
+    var w = { all: 'これまでに', year: '今年', month: '今月', week: '今週' }[sharePeriod];
+    return 'Gaman to Money で' + w + yen(d.sum) + '円分(' + d.n + '回)我慢しました!  #GamanToMoney';
   }
   function logoImage(cb) {
     try {
@@ -1625,12 +1745,21 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
   function drawShare(done) {
     var d = shareData(), W = 1080, H = 1080, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var c = cv.getContext('2d'), SERIF = '"Playfair Display", Georgia, "Times New Roman", serif', SANS = '"Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif';
-    function go(logo) {
+    function cover(img, x, y, w, h) {
+      var k = Math.max(w / img.width, h / img.height), iw = w / k, ih = h / k;
+      c.drawImage(img, (img.width - iw) / 2, (img.height - ih) / 2, iw, ih, x, y, w, h);
+    }
+    function go(logo, bgImg, coinImg) {
       var g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#1b2750'); g.addColorStop(1, '#0c1226'); c.fillStyle = g; c.fillRect(0, 0, W, H);
-      var rg = c.createRadialGradient(W / 2, 330, 20, W / 2, 330, 640); rg.addColorStop(0, 'rgba(245,184,61,.28)'); rg.addColorStop(1, 'rgba(245,184,61,0)'); c.fillStyle = rg; c.fillRect(0, 0, W, H);
+      if (bgImg) { cover(bgImg, 0, 0, W, H); c.fillStyle = 'rgba(8,12,30,.58)'; c.fillRect(0, 0, W, H); }
+      var rg = c.createRadialGradient(W / 2, 330, 20, W / 2, 330, 640); rg.addColorStop(0, 'rgba(245,184,61,' + (bgImg ? '.16' : '.28') + ')'); rg.addColorStop(1, 'rgba(245,184,61,0)'); c.fillStyle = rg; c.fillRect(0, 0, W, H);
       c.strokeStyle = 'rgba(245,184,61,.55)'; c.lineWidth = 4; c.strokeRect(28, 28, W - 56, H - 56);
       c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-      if (logo) c.drawImage(logo, W / 2 - 110, 70, 220, 220);
+      if (coinImg) {
+        c.save(); c.beginPath(); c.arc(W / 2, 180, 110, 0, Math.PI * 2); c.closePath(); c.clip(); cover(coinImg, W / 2 - 110, 70, 220, 220); c.restore();
+        c.beginPath(); c.arc(W / 2, 180, 110, 0, Math.PI * 2); c.strokeStyle = '#f5b83d'; c.lineWidth = 8; c.stroke();
+      } else if (logo) c.drawImage(logo, W / 2 - 110, 70, 220, 220);
+      if (bgImg) { c.shadowColor = 'rgba(0,0,0,.65)'; c.shadowBlur = 14; c.shadowOffsetY = 2; }
       var tg = c.createLinearGradient(260, 0, 820, 0); tg.addColorStop(0, '#d9940a'); tg.addColorStop(.5, '#f9e08a'); tg.addColorStop(1, '#d9940a');
       c.fillStyle = tg; c.font = '900 92px ' + SERIF; c.fillText('Gaman to Money', W / 2, 400);
       c.fillStyle = '#c9d1e3'; c.font = '700 46px ' + SANS; c.fillText(d.label, W / 2, 520);
@@ -1642,12 +1771,18 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
       c.fillStyle = '#f5bc3a'; c.font = '900 ' + unit + 'px ' + SANS; c.fillText('円', x0 + w1 + unit * .3, by);
       c.textAlign = 'center';
       c.strokeStyle = 'rgba(255,255,255,.25)'; c.lineWidth = 3; c.setLineDash([2, 12]); c.lineCap = 'round'; c.beginPath(); c.moveTo(160, 800); c.lineTo(W - 160, 800); c.stroke(); c.setLineDash([]);
-      c.fillStyle = '#9aa6c0'; c.font = '700 36px ' + SANS; c.fillText('我慢した回数', W * .3, 868); c.fillText('実績', W * .7, 868);
-      c.fillStyle = '#fff'; c.font = '900 76px ' + SANS; c.fillText(d.n + ' 回', W * .3, 954); c.fillText(d.got + ' / ' + ACH.length, W * .7, 954);
+      c.fillStyle = '#9aa6c0'; c.font = '700 38px ' + SANS; c.fillText('我慢した回数', W / 2, 868);
+      c.fillStyle = '#fff'; c.font = '900 84px ' + SANS; c.fillText(d.n + ' 回', W / 2, 960);
       c.fillStyle = 'rgba(255,255,255,.4)'; c.font = '700 30px ' + SANS; c.fillText('#GamanToMoney', W / 2, 1030);
+      c.shadowColor = 'transparent'; c.shadowBlur = 0;
       done(cv);
     }
-    logoImage(go);
+    function loadImg(src, cb) { if (!src) return cb(null); var im = new Image(); im.onload = function () { cb(im); }; im.onerror = function () { cb(null); }; im.src = src; }
+    loadImg(SH.bg && P.bg ? P.bg : null, function (bgImg) {
+      loadImg(SH.coin && P.coin ? P.coin : null, function (coinImg) {
+        if (coinImg) go(null, bgImg, coinImg); else logoImage(function (logo) { go(logo, bgImg, null); });
+      });
+    });
   }
   function refreshShare() {
     var load = (document.fonts && document.fonts.load) ? Promise.all([document.fonts.load('900 60px "Playfair Display"'), document.fonts.load('900 60px "Zen Maru Gothic"')]).catch(function () {}) : Promise.resolve();
@@ -1661,7 +1796,7 @@ input[type="range"] { padding: 0; border: 0; background: none; accent-color: var
   }
   function shareSay(t, kind) { var m = $('shareMsg'); m.textContent = t; m.className = 'msg ' + (kind || ''); m.style.minHeight = t ? '1.5em' : '0'; }
   function openShare() {
-    lastFocus = document.activeElement; sharePeriod = 'all'; paintShareSeg(); shareSay('');
+    lastFocus = document.activeElement; sharePeriod = 'week'; paintShareSeg(); shareSay('');
     $('shareSheet').hidden = false; document.body.style.overflow = 'hidden'; $('closeShare').focus(); refreshShare();
   }
   function closeShare() { if ($('shareSheet').hidden) return; $('shareSheet').hidden = true; document.body.style.overflow = ''; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
